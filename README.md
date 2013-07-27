@@ -1,5 +1,5 @@
 # grunt-release
-[Grunt](http://gruntjs.com) plugin for automating all the release steps of your node lib or bower component, with optional publishing to npm.  
+[Grunt](http://gruntjs.com) plugin for automating all the release steps of your node lib or bower component, with optional publishing to npm.
 
 ## Repetition Killed the Cat
 Releasing a new version of your killer Node lib looks like this:
@@ -7,7 +7,7 @@ Releasing a new version of your killer Node lib looks like this:
 1. bump the version in your `package.json` file.
 2. stage the package.json file's change.
 3. commit that change with a message like "release 0.6.22".
-4. create a new git tag for the release. 
+4. create a new git tag for the release.
 5. push the changes out to github.
 6. also push the new tag out to github.
 7. publish the new version to npm.
