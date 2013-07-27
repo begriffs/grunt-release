@@ -75,7 +75,11 @@ You can disable any of the steps if you want, by adding this to your Gruntfile:
     }
   }
 ```
-For node libs, leave `file` option blank. For bower components, set it to `component.json` or whatever you've set your bower config file to be.
+For node libs, leave `file` option blank. For bower components, set it to `component.json` or whatever you've set your bower config file to be. For a lib registered in both bower and npm, specify the `file` option as an array, such as
+```js
+  file: ['package.json', 'bower.json']
+```
+Bumping the version will then affect both files. Note that the git tag generated during a release will default to the version specified in the first file in the array.
 
 ## Credits
 Inspired by Vojta Jina's [grunt-bump](https://github.com/vojtajina/grunt-bump).

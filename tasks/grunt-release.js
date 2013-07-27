@@ -30,7 +30,7 @@ module.exports = function(grunt){
     var config = setup(options.file, type);
     var templateOptions = {
       data: {
-        version: config.newVersion
+        version: config.newVersion[config.file[0]]
       }
     };
 
@@ -42,22 +42,30 @@ module.exports = function(grunt){
     if (options.pushTags) pushTags(config);
     if (options.npm) publish(config);
 
-    function setup(file, type){
-      var pkg = grunt.file.readJSON(file);
-      var newVersion = pkg.version;
-      if (options.bump) {
-        newVersion = semver.inc(pkg.version, type || 'patch');
+    function setup(files, type){
+      if(typeof files === 'string') {
+        files = [files];
       }
-      return {file: file, pkg: pkg, newVersion: newVersion};
+      var pkgs = {}, newVersions = {};
+      for(var i in files) {
+        var pkg = grunt.file.readJSON(files[i]);
+        pkgs[files[i]] = pkg;
+        if (options.bump) {
+          newVersions[files[i]] = semver.inc(pkg.version, type || 'patch');
+        }
+      }
+      return {file: files, pkg: pkgs, newVersion: newVersions};
     }
 
     function add(config){
-      run('git add ' + config.file);
+      for(var i in config.file) {
+        run('git add ' + config.file[i]);
+      }
     }
 
     function commit(config){
       var message = grunt.template.process(commitMessage, templateOptions);
-      run('git commit '+ config.file +' -m "'+ message +'"', config.file + ' committed');
+      run("git commit -m '" + message + "'", "committed " + config.file.join(", "));
     }
 
     function tag(config){
@@ -71,13 +79,13 @@ module.exports = function(grunt){
     }
 
     function pushTags(config){
-      run('git push --tags', 'pushed new tag '+ config.newVersion +' to remote');
+      run('git push --tags', 'pushed new tag '+ config.newVersion[config.file[0]] +' to remote');
     }
 
     function publish(config){
       var cmd = 'npm publish';
       if (options.folder){ cmd += ' ' + options.folder }
-      run(cmd, 'published '+ config.newVersion +' to npm');
+      run(cmd, 'published '+ config.newVersion[config.file[0]] +' to npm');
     }
 
     function run(cmd, msg){
@@ -86,9 +94,13 @@ module.exports = function(grunt){
     }
 
     function bump(config){
-      config.pkg.version = config.newVersion;
-      grunt.file.write(config.file, JSON.stringify(config.pkg, null, '  ') + '\n');
-      grunt.log.ok('Version bumped to ' + config.newVersion);
+      for(var i in config.file) {
+        var file = config.file[i];
+
+        config.pkg[file].version = config.newVersion[file];
+        grunt.file.write(file, JSON.stringify(config.pkg[file], null, '  ') + '\n');
+        grunt.log.ok(file + ' version bumped to ' + config.newVersion[file]);
+      }
     }
 
   });
