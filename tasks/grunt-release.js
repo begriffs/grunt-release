@@ -10,17 +10,24 @@ var shell = require('shelljs');
 var semver = require('semver');
 
 module.exports = function(grunt){
-  grunt.registerTask('release', 'bump version, git tag, git push, npm publish', function(type){
+
+  grunt.registerMultiTask('release-bump', 'bump version', function(type){
+    var pkg = grunt.file.readJSON(this.data);
+    pkg.version = semver.inc(pkg.version, type || 'patch');
+    grunt.file.write(this.data, JSON.stringify(pkg, null, '  ') + '\n');
+    grunt.log.ok(this.target + ' version bumped to ' + pkg.version);
+  });
+
+  grunt.registerTask('release-publish', 'bump all versions, git tag, git push, npm publish', function(type){
     //defaults
     var options = this.options({
-      bump: true,
       file: grunt.config('pkgFile') || 'package.json',
       add: true,
       commit: true,
       tag: true,
       push: true,
       pushTags: true,
-      npm : true
+      npm: true
     });
 
     var tagName = grunt.config.getRaw('release.options.tagName') || '<%= version %>';
@@ -34,7 +41,6 @@ module.exports = function(grunt){
       }
     };
 
-    if (options.bump) bump(config);
     if (options.add) add(config);
     if (options.commit) commit(config);
     if (options.tag) tag(config);
@@ -45,9 +51,6 @@ module.exports = function(grunt){
     function setup(file, type){
       var pkg = grunt.file.readJSON(file);
       var newVersion = pkg.version;
-      if (options.bump) {
-        newVersion = semver.inc(pkg.version, type || 'patch');
-      }
       return {file: file, pkg: pkg, newVersion: newVersion};
     }
 
@@ -105,11 +108,8 @@ module.exports = function(grunt){
       if (msg) grunt.log.ok(msg);
     }
 
-    function bump(config){
-      config.pkg.version = config.newVersion;
-      grunt.file.write(config.file, JSON.stringify(config.pkg, null, '  ') + '\n');
-      grunt.log.ok('Version bumped to ' + config.newVersion);
-    }
-
   });
+
+  grunt.registerTask('release', ['release-bump', 'release-publish']);
+
 };

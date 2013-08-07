@@ -109,9 +109,8 @@ Done, without errors.
 You can disable any of the steps if you want, by adding this to your Gruntfile:
 
 ```js
-  release: {
+  'release-publish': {
     options: {
-      bump: false, //default: true
       file: 'component.json', //default: package.json
       add: false, //default: true
       commit: false, //default: true
@@ -128,6 +127,15 @@ You can disable any of the steps if you want, by adding this to your Gruntfile:
   }
 ```
 For node libs, leave `file` option blank. For bower components, set it to `component.json` or whatever you've set your bower config file to be.
+
+To bump the version numbers in your node or bower libs, add this to your Gruntfile:
+
+```js
+  'release-bump': {
+    npm: 'package.json',
+    bower: 'bower.json'
+  }
+```
 
 ## Credits
 Inspired by Vojta Jina's [grunt-bump](https://github.com/vojtajina/grunt-bump).
